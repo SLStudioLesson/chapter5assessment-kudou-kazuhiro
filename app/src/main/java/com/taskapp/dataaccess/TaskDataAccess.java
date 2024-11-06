@@ -80,12 +80,27 @@ public class TaskDataAccess {
      * @return 取得したタスク
      */
     public Task findByCode(int code) {
+        Task task = null;
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            reader.readLine();
+            String line;
+            while((line = reader.readLine()) != null) {
+                String[] str = line.split(",");
 
+                int taskCode = Integer.parseInt(str[0]);
+                if(code != taskCode) {
+                    continue;
+                }
+
+                task = new Task(taskCode, str[1],
+                    Integer.parseInt(str[2]),
+                    userDataAccess.findByCode(Integer.parseInt(str[3]))
+                );
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return task;
     }
 
     /**
@@ -93,8 +108,20 @@ public class TaskDataAccess {
      * @param updateTask 更新するタスク
      */
     public void update(Task updateTask) {
+        List<Task> tasks = findAll();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write("Code,Name,Status,Rep_User_Code\n");
 
+            String line;
+            for(Task task : tasks) {
+                if(task.getCode() == updateTask.getCode()) {
+                    line = createLine(updateTask);
+                } else {
+                    line = createLine(task);
+                }
+                writer.write(line);
+                writer.newLine();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -117,6 +144,8 @@ public class TaskDataAccess {
      * @param task フォーマットを作成するタスク
      * @return CSVに書き込むためのフォーマット文字列
      */
-    // private String createLine(Task task) {
-    // }
+    private String createLine(Task task) {
+        return task.getCode() + "," + task.getName() + "," +
+                task.getStatus() + "," + task.getRepUser().getCode();
+    }
 }

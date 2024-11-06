@@ -100,6 +100,12 @@ public class TaskLogic {
      */
     public void changeStatus(int code, int status,
                             User loginUser) throws AppException {
+        Task task = taskDataAccess.findByCode(code);
+
+        task.setStatus(status);
+        taskDataAccess.update(task);
+
+        logDataAccess.save(new Log(code, loginUser.getCode(), status, LocalDate.now()));
     }
 
     /**

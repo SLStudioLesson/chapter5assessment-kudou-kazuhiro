@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import com.taskapp.dataaccess.TaskDataAccess;
 import com.taskapp.dataaccess.UserDataAccess;
 import com.taskapp.exception.AppException;
 import com.taskapp.logic.TaskLogic;
 import com.taskapp.logic.UserLogic;
+import com.taskapp.model.Task;
 import com.taskapp.model.User;
 
 public class TaskUI {
@@ -200,15 +202,19 @@ public class TaskUI {
      * @see com.taskapp.logic.TaskLogic#changeStatus(int, int, User)
      */
     public void inputChangeInformation() {
-        try {
-            boolean flg = true;
-            while (flg) {
+        boolean flg = true;
+        while (flg) {
+            try {
                 System.err.println("タスクコードを入力してください：");
                 String code = reader.readLine();
                 if(!isNumeric(code)) {
                     System.out.println("コードは半角の数字で入力してください");
                     System.out.println();
                     continue;
+                }
+                Task task = new TaskDataAccess().findByCode(Integer.parseInt(code));
+                if(task == null) {
+                    throw new AppException("存在するタスクコードを入力してください");
                 }
 
                 System.out.println("どのステータスに変更するか選択してください。");
@@ -225,10 +231,19 @@ public class TaskUI {
                     System.out.println();
                     continue;
                 }
+                if (task.getStatus()+1 != Integer.parseInt(changeStatus)) {
+                    throw new AppException("ステータスは、前のステータスより1つ先のもののみを選択してください");
+                }
+
+                taskLogic.changeStatus(Integer.parseInt(code), Integer.parseInt(changeStatus), loginUser);
+                break;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (AppException e) {
+                System.err.println(e.getMessage());
+                System.out.println();
             }
-            
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

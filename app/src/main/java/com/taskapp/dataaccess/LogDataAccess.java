@@ -28,7 +28,7 @@ public class LogDataAccess {
      * @param log 保存するログ
      */
     public void save(Log log) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
             
             String line = log.getTaskCode() + "," + log.getChangeUserCode() + "," +
                 log.getStatus() + "," + log.getChangeDate();
